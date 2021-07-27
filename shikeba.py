@@ -7,9 +7,6 @@ except RuntimeError as r:
         t = os.popen('adb connect 192.168.2.4')
         print(t.readlines())
         d = u2.connect('192.168.2.4:5555')
-
-print(u2.Device)
-print(d.info)
 #   试客巴包名：com.yc.apps.shikeba
 #   淘宝包名：com.taobao.taobao
 #   点击免费试用
@@ -29,14 +26,14 @@ if task == 'tb':
     #   循环查找搜索框并点击搜索按钮
     while True:
         # 首页的搜索框
-        ele = d.xpath(
-            '//*[@resource-id="com.taobao.taobao:id/sv_search_view"]/android.widget.FrameLayout[1]/android.widget.FrameLayout[1]/android.widget.FrameLayout[1]/android.view.View[1]')
-        if ele.exists:
+        if d(descriptionContains='搜索').exists:
+            ele = d(descriptionContains='搜索')
             ele.click()
-        # 搜索框
-        elif d.xpath('//*[@resource-id="com.taobao.taobao:id/searchEdit"]').exists:
-            d.xpath('//*[@resource-id="com.taobao.taobao:id/searchEdit"]').click()
             break
+        # 搜索框
+        elif d.xpath('//*[@resource-id="com.taobao.taobao:id/if_action_bar_search_text"]').click_exists(timeout=3):
+            break
+            pass
         else:
             d.press('back')
             d.press('back')
@@ -53,6 +50,14 @@ if task == 'tb':
     d.xpath('//*[@resource-id="com.taobao.taobao:id/searchbtn"]').click()
     #   排序
     d(resourceId="com.taobao.taobao:id/styleBtn").click()
+    # 等待商品页面的分享按钮出现
+    while not d.xpath('//*[@text="分享"]').exists:
+        d.sleep(3)
+    d(text="ꄪ").click_exists(timeout=1)
+    d.xpath('//*[@content-desc="复制链接"]').click(timeout=5)
+    d.app_start('com.yc.apps.shikeba', wait=True)
+    d.swipe_ext('up', scale=0.5)
+    d.xpath('//android.widget.EditText').set_text(d.clipboard)
 elif task == 'pdd':
     # 定位搜索框
     d(text="").click()
